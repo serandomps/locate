@@ -1,0 +1,12 @@
+{
+    "name": "locate",
+    "description": "locate component",
+    "scripts": ["index.js"],
+    "styles": ["styles.css"],
+    "templates": ["template.html"],
+    "main": "index.js",
+    "dependencies": {
+        "serandomps/serand": "master",
+        "serandomps/utils": "master"
+    }
+}
