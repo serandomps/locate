@@ -1,71 +1,82 @@
-<div class="form-group source locate has-feedback" data-name="location">
+<div class="form-group locate has-feedback">
     <!--<label>Make</label>-->
-    <select class="form-control" data-value="{location}">
-        <option value="-">Location</option>
-        <option value="+">Add Location</option>
-        <option>10230, Sri Lanka</option>
-        <option>Pannipitiya, 10230, Sri Lanka</option>
-        <option>Mahalwarawa, Pannipitiya, 10230, Sri Lanka</option>
-        <option>95/4/1, Mahalwarawa, Pannipitiya, 10230, Colombo, Sri Lanka</option>
-        <option>95/4/1, Bangalawatta, Kottawa</option>
+    <select class="form-control locate-location" data-value="{location}">
+        <option value="">Location</option>
+        <!--  <option value="+">Add Location</option>
+        {#locations}
+        <option value="{id}">{line1}, {line2}, {city}, {postal}, {country}</option>
+        {/locations}-->
     </select>
     <span class="form-control-feedback hidden"></span>
     <span class="help-block hidden"></span>
 
-    <div class="location-add hidden">
-        <div class="form-group location-search has-feedback">
+    <div class="locate-add hidden">
+        <div class="form-group locate-search has-feedback">
             <!--<label class="control-label">Search</label>-->
             <div class="input-group">
-                            <span class="input-group-btn">
-                              <button class="btn btn-default" type="button">
-                                  <i class="fas fa-search"></i>
-                              </button>
-                            </span>
-                <input type="text" class="form-control" placeholder="Search your address" value="{color}">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="button">
+                      <i class="fas fa-search"></i>
+                  </button>
+                </span>
+                <input type="text" class="form-control" placeholder="Search your address" value="{address}"/>
             </div>
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
 
-        <div class="location-map"></div>
+        <div class="form-group">
+            <div class="locate-map"></div>
+        </div>
 
-        <!--<label>Make</label>-->
-        <select class="form-control" data-name="type" data-value="{year}">
-            <option>Country</option>
-            <option>Sri Lanka</option>
-            <option>Australia</option>
-            <option>Singapore</option>
-            <option>New Zeland</option>
-        </select>
+        <div class="form-group locate-country has-feedback" data-name="country">
+            <!--<label>Make</label>-->
+            <select class="form-control" data-name="country" data-value="{country}">
+                <option value="">Country</option>
+                <option>Sri Lanka</option>
+                <option>Australia</option>
+                <option>Singapore</option>
+                <option>New Zeland</option>
+            </select>
+        </div>
 
-        <div class="form-group source location-postal has-feedback" data-name="location-postal">
+        <div class="form-group locate-postal has-feedback" data-name="postal">
             <label class="control-label">Postal Code</label>
-            <input type="text" class="form-control" placeholder="Postal Code" value="{color}">
+            <input type="text" class="form-control" placeholder="Postal Code" value="{postal}">
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
 
-        <!--<label>Make</label>-->
-        <select class="form-control" data-name="type" data-value="{year}">
-            <option>City</option>
-            <option>Pannipitiya</option>
-            <option>Kottawa</option>
-            <option>Galle</option>
-            <option>Walasmulla</option>
-        </select>
-        <span class="form-control-feedback hidden"></span>
-        <span class="help-block hidden"></span>
-
-        <div class="form-group source location-first has-feedback" data-name="location-first">
-            <label class="control-label">Address Line 1</label>
-            <input type="text" class="form-control" placeholder="First" value="{color}">
+        <div class="form-group locate-city has-feedback" data-name="city">
+            <!--<label>Make</label>-->
+            <select class="form-control" data-name="type" data-value="{city}">
+                <option value="">City</option>
+                <option>Pannipitiya</option>
+                <option>Kottawa</option>
+                <option>Galle</option>
+                <option>Walasmulla</option>
+            </select>
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
 
-        <div class="form-group source location-second has-feedback" data-name="location-second">
+        <div class="form-group locate-line2 has-feedback" data-name="line2">
             <label class="control-label">Address Line 2</label>
-            <input type="text" class="form-control" placeholder="Second" value="{color}">
+            <input type="text" class="form-control" placeholder="Line 2" value="{line2}">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group locate-line1 has-feedback" data-name="line1">
+            <label class="control-label">Address Line 1</label>
+            <input type="text" class="form-control" placeholder="Line 1" value="{line1}">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group locate-name has-feedback" data-name="name">
+            <label class="control-label">Location Name</label>
+            <input type="text" class="form-control" placeholder="Location Name" value="{name}">
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>

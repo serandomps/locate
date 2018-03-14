@@ -6,7 +6,9 @@
     "templates": ["template.html"],
     "main": "index.js",
     "dependencies": {
+        "serandomps/dust": "master",
         "serandomps/serand": "master",
-        "serandomps/utils": "master"
+        "serandomps/utils": "master",
+        "serandomps/form": "master"
     }
 }
