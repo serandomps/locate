@@ -1,7 +1,7 @@
 {
     "name": "locate",
     "description": "locate component",
-    "scripts": ["index.js"],
+    "scripts": ["locate.js", "index.js"],
     "styles": ["styles.css"],
     "templates": ["template.html"],
     "main": "index.js",

@@ -2,26 +2,11 @@ var serand = require('serand');
 var utils = require('utils');
 var form = require('form');
 var dust = require('dust')();
+var locate = require('./locate');
 
 dust.loadSource(dust.compile(require('./template'), 'locate'));
 
-var map;
-
-var geocoder;
-
-var marker;
-
-var autoComplete;
-
 var googleGelocate = 'https://www.googleapis.com/geolocation/v1/geolocate?key=';
-
-var current;
-
-var selectLocation;
-
-var selectCountry;
-
-var selectCity;
 
 utils.configs('boot', function (err, config) {
     if (err) {
@@ -29,6 +14,124 @@ utils.configs('boot', function (err, config) {
     }
     googleGelocate += config.googleKey;
 });
+
+var select = function (el, val) {
+    el = el.children('select');
+    return val ? el.val(val) : el;
+};
+
+var configs = {
+    name: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    line1: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please enter the number, street etc. of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    line2: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    city: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please enter the city of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    postal: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please enter the postal code of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    district: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please enter the district of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    province: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please enter the province of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    state: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            /*if (!value) {
+                return done(null, 'Please enter the state of your location');
+            }*/
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            $('input', source).val(value);
+            done()
+        }
+    },
+    country: {
+        find: function (context, source, done) {
+            var value = $('input', source).val();
+            if (!value) {
+                return done(null, 'Please select the country of your location');
+            }
+            done(null, null, value);
+        },
+        update: function (context, source, error, value, done) {
+            done();
+        }
+    }
+};
 
 var locateIp = function (done) {
     $.ajax({
@@ -51,102 +154,38 @@ var locateIp = function (done) {
     });
 };
 
-var locate = function (o) {
-    var address = {};
-    var components = o.address_components;
-    components.forEach(function (component) {
-        component.types.forEach(function (type) {
-            if (['political'].indexOf(type) !== -1) {
-                return;
-            }
-            address[type] = component;
-        });
-    });
-    var geometry = o.geometry;
-    if (geometry) {
-        address.latitude = geometry.location.lat;
-        address.longitude = geometry.location.lng;
-    }
-    address.name = o.name;
-    address.place_id = o.place_id;
-    address.international_phone_number = o.international_phone_number;
-    return address;
-};
-
-var located = function (o) {
-    o = locate(o);
-    var line1 = function (o) {
-        if (o.premise) {
-            return o.premise.long_name;
-        }
-        if (o.subpremise) {
-            return o.subpremise.long_name;
-        }
-        if (o.room) {
-            return o.room.long_name;
-        }
-        if (o.floor) {
-            return o.floor.long_name;
-        }
-        if (o.post_box) {
-            return o.post_box.long_name;
-        }
-        if (o.colloquial_area) {
-            return o.colloquial_area.long_name;
-        }
-        if (o.street_number) {
-            return o.street_number.long_name;
-        }
-        return null;
-    };
-    var line2 = function (o) {
-        if (o.route) {
-            return o.route.long_name;
-        }
-        return null;
-    };
-    var city = function (o) {
-        if (o.sublocality) {
-            return o.sublocality.long_name;
-        }
-        if (o.locality) {
-            return o.locality.long_name;
-        }
-        return null;
-    };
-    var location = {
-        name: o.name,
-        line1: line1(o),
-        line2: line2(o),
-        city: city(o),
-        postal: o.postal_code && o.postal_code.long_name,
-        district: o.administrative_area_level_2 && o.administrative_area_level_2.long_name,
-        province: o.administrative_area_level_1 && o.administrative_area_level_1.long_name,
-        country: o.country && o.country.short_name,
-        latitude: o.latitude,
-        longitude: o.longitude
-    };
-    console.log('original');
-    console.log(o);
-    console.log('parsed');
-    console.log(JSON.stringify(location));
-    return location;
-};
-
-var locationUpdated = function (elem, location) {
+var locationUpdated = function (ctx, elem, location) {
     console.log(location);
-    current = location;
+    ctx.current = location;
+    $('.locate-name', elem).find('input').val(location.name);
     $('.locate-line1', elem).find('input').val(location.line1);
     $('.locate-line2', elem).find('input').val(location.line2);
     $('.locate-postal', elem).find('input').val(location.postal);
-    $('.locate-name', elem).find('input').val(location.name);
-    selectCity.setValue(location.city);
-    selectCountry.setValue(location.country);
+    $('.locate-city', elem).find('input').val(location.city);
+    var el = $('.locate-district', elem);
+    if (location.district) {
+        el.removeClass('hidden').find('input').val(location.district);
+    } else {
+        el.addClass('hidden');
+    }
+    el = $('.locate-province', elem);
+    if (location.province) {
+        el.removeClass('hidden').find('input').val(location.province);
+    } else {
+        el.addClass('hidden');
+    }
+    el = $('.locate-state', elem);
+    if (location.state) {
+        el.removeClass('hidden').find('input').val(location.state);
+    } else {
+        el.addClass('hidden');
+    }
+    $('.locate-country', elem).find('input').val(location.country);
 }
 
-var initMap = function (elem, options, done) {
-    map = new google.maps.Map($('.locate-map', elem)[0], options);
-    marker = new google.maps.Marker({
+var initMap = function (ctx, elem, options, done) {
+    var map = new google.maps.Map($('.locate-map', elem)[0], options);
+    var marker = new google.maps.Marker({
         map: map,
         position: options.center,
         draggable: true
@@ -154,19 +193,23 @@ var initMap = function (elem, options, done) {
     map.addListener('click', function (e) {
         marker.setPosition(e.latLng);
     });
-    geocoder = new google.maps.Geocoder();
-    autoComplete = new google.maps.places.Autocomplete($('.locate-search', elem).find('input')[0], {});
+    var geocoder = new google.maps.Geocoder();
+    var autoComplete = new google.maps.places.Autocomplete($('.locate-search', elem).find('input')[0], {});
     autoComplete.addListener('place_changed', function () {
         var place = utils.clone(autoComplete.getPlace());
-        var location = located(place);
-        locationUpdated(elem, location);
-        updateMap(elem, {
+        var location = locate(place);
+        locationUpdated(ctx, elem, location);
+        updateMap(ctx, elem, {
             zoom: 18, center: {
                 lat: location.latitude,
                 lng: location.longitude
             }
         }, serand.none);
     });
+    ctx.map = map;
+    ctx.marker = marker;
+    ctx.geocoder = geocoder;
+    ctx.autoComplete = autoComplete;
     done();
 };
 
@@ -184,16 +227,16 @@ var findPosition = function (done) {
     });
 };
 
-var findLocation = function (o, done) {
-    geocoder.geocode(o, function (results, status) {
+var findLocation = function (ctx, o, done) {
+    ctx.geocoder.geocode(o, function (results, status) {
         if (status !== 'OK') {
             return done(status);
         }
-        done(null, located(utils.clone(results[0])));
+        done(null, locate(utils.clone(results[0])));
     });
 };
 
-var showMap = function (elem, done) {
+var showMap = function (ctx, elem, done) {
     $('.locate-add', elem).removeClass('hidden');
     findPosition(function (err, location) {
         if (err) {
@@ -203,32 +246,32 @@ var showMap = function (elem, done) {
             lat: location.latitude,
             lng: location.longitude
         };
-        if (map) {
-            return updateMap(elem, {zoom: 18, center: center}, done);
+        if (ctx.map) {
+            return updateMap(ctx, elem, {zoom: 18, center: center}, done);
         }
         var options = {
             zoom: 18,
             center: center
         };
-        initMap(elem, options, function (err) {
+        initMap(ctx, elem, options, function (err) {
             if (err) {
                 return done(err);
             }
-            findLocation({location: center}, function (err, location) {
+            findLocation(ctx, {location: center}, function (err, location) {
                 if (err) {
                     return done(err);
                 }
-                locationUpdated(elem, location);
+                locationUpdated(ctx, elem, location);
                 done();
             });
         });
     });
 };
 
-var updateMap = function (elem, options, done) {
-    map.setCenter(options.center);
-    map.setZoom(options.zoom);
-    marker.setPosition(options.center);
+var updateMap = function (ctx, elem, options, done) {
+    ctx.map.setCenter(options.center);
+    ctx.map.setZoom(options.zoom);
+    ctx.marker.setPosition(options.center);
     done();
 };
 
@@ -266,115 +309,135 @@ var create = function (location, done) {
     });
 };
 
-module.exports = function (sandbox, options, done) {
-    options = options || {};
-    find(options, function (err, existing) {
+var address = function (location) {
+    var address = '';
+    address += location.name ? location.name + ', ' : '';
+    if (location.name !== location.line1) {
+        address += location.line1 ? location.line1 + ', ' : '';
+    }
+    if (location.name !== location.line2 && location.line1 !== location.line2) {
+        address += location.line2 ? location.line2 + ', ' : '';
+    }
+    address += location.city ? location.city + ', ' : '';
+    if (location.city !== location.district) {
+        address += location.district ? location.district + ', ' : '';
+    }
+    address += location.provice ? location.province + ', ' : '';
+    address += location.state ? location.state + ', ' : '';
+    address += location.postal ? location.postal + ', ' : '';
+    address += location.country ? location.country : '';
+    return address;
+};
+
+module.exports = function (sandbox, data, done) {
+    data = data || {};
+    var loctex = {
+        map: null,
+        geocoder: null,
+        marker: null,
+        autoComplete: null,
+        current: null,
+        selectLocation: null,
+        selectCountry: null,
+        selectCity: null
+    };
+    find(data, function (err, existing) {
         if (err) {
             return done(err);
         }
-        var ctx = {
-            locations: existing
-        };
-        dust.render('locate', ctx, function (err, out) {
+        dust.render('locate', {locations: existing}, function (err, out) {
             if (err) {
                 return done(err);
             }
-            sandbox.append(out);
-            var added;
-            var el = $('.locate', sandbox);
-            var eventer = utils.eventer();
-            selectLocation = form.selectize($('.locate-location', el).val(options.location || ''));
-            var address = function (location) {
-                var address = '';
-                address += location.name ? location.name + ', ' : '';
-                if (location.name !== location.line1) {
-                    address += location.line1 ? location.line1 + ', ' : '';
+            var elem = sandbox.append(out);
+            var lform = form.create(elem, configs);
+            lform.render(data, function (err) {
+                if (err) {
+                    return done(err);
                 }
-                if (location.name !== location.line2 && location.line1 !== location.line2) {
-                    address += location.line2 ? location.line2 + ', ' : '';
-                }
-                address += location.city ? location.city + ', ' : '';
-                if (location.city !== location.district) {
-                    address += location.district ? location.district + ', ' : '';
-                }
-                address += location.provice ? location.province + ', ' : '';
-                address += location.state ? location.state + ', ' : '';
-                address += location.postal ? location.postal + ', ' : '';
-                address += location.country ? location.country : '';
-                return address;
-            };
-            var ctx = _.map(existing, function (location) {
-                return {
-                    value: location.id,
-                    text: address(location),
-                    location: location
-                }
-            });
-            var locations = [{value: '+', text: 'Add Location'}];
-            locations = locations.concat(ctx);
-            selectLocation.addOption(locations);
-            selectLocation.on('change', function (loc) {
-                console.log(loc)
-                // current = loc;
-                eventer.emit('change', loc, serand.none);
-                if (loc === '+') {
-                    return showMap(el, serand.none);
-                }
-                hideMap(el);
-            });
-            selectCountry = form.selectize($('.locate-country', el).find('select'));
-            selectCity = form.selectize($('.locate-city', el).find('select'));
-            eventer.on('destroy', function (done) {
-                el.remove();
-                done();
-            });
-            eventer.on('find', function (done) {
-                var value = el.children('select').val();
-                if (!value || value === '+') {
-                    return done(null, 'Please select the location of your vehicle');
-                }
-                var data;
-                if (value === '-') {
-                    data = selectLocation.options['-'];
-                    return done(null, null, data.location);
-                }
-                done(null, null, value);
-            });
-            eventer.on('update', function (value, done) {
-                done();
-            });
-            eventer.on('create', function (location, done) {
-                console.log('creating location')
-                console.log(location)
-                create(location, done);
-            });
-            eventer.on('collapse', function (done) {
-                hideMap(el);
-                // how to get newly added address
-                // how to handle multipe usages of locate components
-                // introduce a local ctx which get passed to all methods
-                // add -> select existing -> add -> next shows empty in selected
-                var locations = [{value: '-', text: address(current), location: current}];
-                locations.push({value: '+', text: 'Edit Location'});
+                var added;
+                var el = $('.locate', sandbox);
+                var eventer = utils.eventer();
+                loctex.selectLocation = form.selectize($('.locate-location', el).val(data.location || ''));
+                var ctx = _.map(existing, function (location) {
+                    return {
+                        value: location.id,
+                        text: address(location),
+                        location: location
+                    }
+                });
+                var locations = [{value: '+', text: 'Add Location'}];
                 locations = locations.concat(ctx);
-                console.log(locations);
-                selectLocation.destroy();
-                selectLocation = form.selectize($('.locate-location', el));
-                selectLocation.addOption(locations);
-                selectLocation.addItem('-');
-                selectLocation.refreshOptions(false);
-                selectLocation.on('change', function (loc) {
+                loctex.selectLocation.addOption(locations);
+                loctex.selectLocation.on('change', function (loc) {
                     console.log(loc)
                     // current = loc;
                     eventer.emit('change', loc, serand.none);
                     if (loc === '+') {
-                        return showMap(el, serand.none);
+                        return showMap(loctex, el, serand.none);
                     }
                     hideMap(el);
                 });
-                done();
+                loctex.selectCountry = form.selectize($('.locate-country', el).find('select'));
+                loctex.selectCity = form.selectize($('.locate-city', el).find('select'));
+                eventer.on('destroy', function (done) {
+                    el.remove();
+                    done();
+                });
+                eventer.on('find', function (done) {
+                    var value = el.children('select').val();
+                    if (!value || value === '+') {
+                        // TODO: return null here and error can be moved to caller
+                        return done(null, 'Please select the location of your vehicle');
+                    }
+                    if (value === '-') {
+                        return lform.find(function (err, errors, data) {
+                            console.log('lform.find');
+                            console.log(err);
+                            console.log(errors);
+                            console.log(data);
+                            done(err, errors, data);
+                        });
+                    }
+                    done(null, null, value);
+                });
+                eventer.on('update', function (error, value, done) {
+                    done();
+                });
+                eventer.on('create', function (location, done) {
+                    console.log('creating location')
+                    console.log(location)
+                    create(location, done);
+                });
+                eventer.on('collapse', function (done) {
+                    hideMap(el);
+                    // how to get newly added address
+                    // how to handle multipe usages of locate components
+                    // introduce a local ctx which get passed to all methods
+                    // add -> select existing -> add -> next shows empty in selected
+                    var locations = [{value: '-', text: address(loctex.current), location: loctex.current}];
+                    locations.push({value: '+', text: 'Edit Location'});
+                    locations = locations.concat(ctx);
+                    console.log(locations);
+                    var selectLocation = loctex.selectLocation;
+                    selectLocation.destroy();
+                    selectLocation = form.selectize($('.locate-location', el));
+                    selectLocation.addOption(locations);
+                    selectLocation.addItem('-');
+                    selectLocation.refreshOptions(false);
+                    selectLocation.on('change', function (loc) {
+                        console.log(loc)
+                        // current = loc;
+                        eventer.emit('change', loc, serand.none);
+                        if (loc === '+') {
+                            return showMap(loctex, el, serand.none);
+                        }
+                        hideMap(el);
+                    });
+                    done();
+                });
+                done(null, eventer);
             });
-            done(null, eventer);
         });
     });
 };

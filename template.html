@@ -11,7 +11,7 @@
     <span class="help-block hidden"></span>
 
     <div class="locate-add hidden">
-        <div class="form-group locate-search has-feedback">
+        <div class="form-group source locate-search has-feedback">
             <!--<label class="control-label">Search</label>-->
             <div class="input-group">
                 <span class="input-group-btn">
@@ -29,54 +29,65 @@
             <div class="locate-map"></div>
         </div>
 
-        <div class="form-group locate-country has-feedback" data-name="country">
-            <!--<label>Make</label>-->
-            <select class="form-control" data-name="country" data-value="{country}">
-                <option value="">Country</option>
-                <option>Sri Lanka</option>
-                <option>Australia</option>
-                <option>Singapore</option>
-                <option>New Zeland</option>
-            </select>
-        </div>
-
-        <div class="form-group locate-postal has-feedback" data-name="postal">
-            <label class="control-label">Postal Code</label>
-            <input type="text" class="form-control" placeholder="Postal Code" value="{postal}">
+        <div class="form-group source locate-name has-feedback" data-name="name">
+            <label class="control-label">Location Name</label>
+            <input type="text" class="form-control" placeholder="Location Name" value="{name}">
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
 
-        <div class="form-group locate-city has-feedback" data-name="city">
-            <!--<label>Make</label>-->
-            <select class="form-control" data-name="type" data-value="{city}">
-                <option value="">City</option>
-                <option>Pannipitiya</option>
-                <option>Kottawa</option>
-                <option>Galle</option>
-                <option>Walasmulla</option>
-            </select>
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
-        </div>
-
-        <div class="form-group locate-line2 has-feedback" data-name="line2">
-            <label class="control-label">Address Line 2</label>
-            <input type="text" class="form-control" placeholder="Line 2" value="{line2}">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
-        </div>
-
-        <div class="form-group locate-line1 has-feedback" data-name="line1">
+        <div class="form-group source locate-line1 has-feedback" data-name="line1">
             <label class="control-label">Address Line 1</label>
             <input type="text" class="form-control" placeholder="Line 1" value="{line1}">
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
 
-        <div class="form-group locate-name has-feedback" data-name="name">
-            <label class="control-label">Location Name</label>
-            <input type="text" class="form-control" placeholder="Location Name" value="{name}">
+        <div class="form-group source locate-line2 has-feedback" data-name="line2">
+            <label class="control-label">Address Line 2</label>
+            <input type="text" class="form-control" placeholder="Line 2" value="{line2}">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-postal has-feedback" data-name="postal">
+            <label class="control-label">Postal Code</label>
+            <input type="text" class="form-control" placeholder="Postal Code" value="{postal}">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-city has-feedback" data-name="city">
+            <label class="control-label">City</label>
+            <input type="text" class="form-control" placeholder="City" value="{city}" disabled="disabled">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-district has-feedback" data-name="district">
+            <label class="control-label">District</label>
+            <input type="text" class="form-control" placeholder="District" value="{district}" disabled="disabled">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-province has-feedback" data-name="province">
+            <label class="control-label">Province</label>
+            <input type="text" class="form-control" placeholder="Province" value="{province}" disabled="disabled">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-state has-feedback" data-name="state">
+            <label class="control-label">State</label>
+            <input type="text" class="form-control" placeholder="State" value="{state}" disabled="disabled">
+            <span class="form-control-feedback hidden"></span>
+            <span class="help-block hidden"></span>
+        </div>
+
+        <div class="form-group source locate-country has-feedback" data-name="country">
+            <label class="control-label">Country</label>
+            <input type="text" class="form-control" placeholder="Country" value="{country}" disabled="disabled">
             <span class="form-control-feedback hidden"></span>
             <span class="help-block hidden"></span>
         </div>
