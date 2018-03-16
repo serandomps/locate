@@ -337,9 +337,7 @@ module.exports = function (sandbox, data, done) {
         marker: null,
         autoComplete: null,
         current: null,
-        selectLocation: null,
-        selectCountry: null,
-        selectCity: null
+        selectLocation: null
     };
     find(data, function (err, existing) {
         if (err) {
@@ -378,8 +376,6 @@ module.exports = function (sandbox, data, done) {
                     }
                     hideMap(el);
                 });
-                loctex.selectCountry = form.selectize($('.locate-country', el).find('select'));
-                loctex.selectCity = form.selectize($('.locate-city', el).find('select'));
                 eventer.on('destroy', function (done) {
                     el.remove();
                     done();
@@ -419,13 +415,12 @@ module.exports = function (sandbox, data, done) {
                     locations.push({value: '+', text: 'Edit Location'});
                     locations = locations.concat(ctx);
                     console.log(locations);
-                    var selectLocation = loctex.selectLocation;
-                    selectLocation.destroy();
-                    selectLocation = form.selectize($('.locate-location', el));
-                    selectLocation.addOption(locations);
-                    selectLocation.addItem('-');
-                    selectLocation.refreshOptions(false);
-                    selectLocation.on('change', function (loc) {
+                    loctex.selectLocation.destroy();
+                    loctex.selectLocation = form.selectize($('.locate-location', el));
+                    loctex.selectLocation.addOption(locations);
+                    loctex.selectLocation.addItem('-');
+                    loctex.selectLocation.refreshOptions(false);
+                    loctex.selectLocation.on('change', function (loc) {
                         console.log(loc)
                         // current = loc;
                         eventer.emit('change', loc, serand.none);
