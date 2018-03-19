@@ -382,11 +382,11 @@ module.exports = function (sandbox, data, done) {
                 });
                 eventer.on('find', function (done) {
                     var value = el.children('select').val();
-                    if (!value || value === '+') {
+                    if (!value) {
                         // TODO: return null here and error can be moved to caller
                         return done(null, 'Please select the location of your vehicle');
                     }
-                    if (value === '-') {
+                    if (value === '-' || value === '+') {
                         return lform.find(function (err, errors, data) {
                             console.log('lform.find');
                             console.log(err);
@@ -397,8 +397,9 @@ module.exports = function (sandbox, data, done) {
                     }
                     done(null, null, value);
                 });
-                eventer.on('update', function (error, value, done) {
-                    done();
+                eventer.on('update', function (errors, data, done) {
+                    console.log(data)
+                    lform.update(errors, data, done);
                 });
                 eventer.on('create', function (location, done) {
                     console.log('creating location')
