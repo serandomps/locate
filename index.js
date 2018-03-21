@@ -387,12 +387,17 @@ module.exports = function (sandbox, data, done) {
                         return done(null, 'Please select the location of your vehicle');
                     }
                     if (value === '-' || value === '+') {
-                        return lform.find(function (err, errors, data) {
-                            console.log('lform.find');
-                            console.log(err);
-                            console.log(errors);
-                            console.log(data);
-                            done(err, errors, data);
+                        return lform.find(function (err, errors, location) {
+                            if (err) {
+                                return done(err);
+                            }
+                            if (errors && errors.line1 && location.line2) {
+                                location.line1 = location.line2;
+                                delete location.line2;
+                                locationUpdated(loctex, elem, location);
+                                return lform.find(done);
+                            }
+                            done(err, errors, location);
                         });
                     }
                     done(null, null, value);
