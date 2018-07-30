@@ -149,7 +149,7 @@ var locateIp = function (done) {
             });
         },
         error: function (xhr, status, err) {
-            done(err);
+            done(err || status || xhr);
         }
     });
 };
