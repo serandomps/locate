@@ -282,7 +282,7 @@ var hideMap = function (elem) {
 var find = function (options, done) {
     $.ajax({
         method: 'GET',
-        url: utils.resolve('accounts://apis/v/locations'),
+        url: utils.resolve('accounts:///apis/v/locations'),
         dataType: 'json',
         success: function (data) {
             done(null, data);
@@ -296,7 +296,7 @@ var find = function (options, done) {
 var create = function (location, done) {
     $.ajax({
         method: 'POST',
-        url: utils.resolve('accounts://apis/v/locations'),
+        url: utils.resolve('accounts:///apis/v/locations'),
         dataType: 'json',
         contentType: 'application/json',
         data: JSON.stringify(location),
