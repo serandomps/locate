@@ -89,7 +89,20 @@ var configs = {
             done(null, null, value);
         },
         update: function (context, source, error, value, done) {
+            if (!value) {
+                return done();
+            }
             $('input', source).val(value);
+            source.removeClass('hidden');
+            done()
+        },
+        render: function (elem, data, value, done) {
+            var el = $('.locate-district', elem);
+            if (value) {
+                el.removeClass('hidden').find('input').val(location.district);
+            } else {
+                el.addClass('hidden');
+            }
             done()
         }
     },
@@ -102,7 +115,20 @@ var configs = {
             done(null, null, value);
         },
         update: function (context, source, error, value, done) {
+            if (!value) {
+                return done();
+            }
             $('input', source).val(value);
+            source.removeClass('hidden');
+            done()
+        },
+        render: function (elem, data, value, done) {
+            var el = $('.locate-province', elem);
+            if (value) {
+                el.removeClass('hidden').find('input').val(location.province);
+            } else {
+                el.addClass('hidden');
+            }
             done()
         }
     },
@@ -115,7 +141,20 @@ var configs = {
             done(null, null, value);
         },
         update: function (context, source, error, value, done) {
+            if (!value) {
+                return done();
+            }
             $('input', source).val(value);
+            source.removeClass('hidden');
+            done()
+        },
+        render: function (elem, data, value, done) {
+            var el = $('.locate-state', elem);
+            if (value) {
+                el.removeClass('hidden').find('input').val(location.state);
+            } else {
+                el.addClass('hidden');
+            }
             done()
         }
     },
@@ -128,7 +167,32 @@ var configs = {
             done(null, null, value);
         },
         update: function (context, source, error, value, done) {
+            $('input', source).val(value);
             done();
+        }
+    },
+    latitude: {
+        find: function (context, source, done) {
+            done(null, null, context.value);
+        },
+        update: function (context, source, error, value, done) {
+            context.value = value;
+            done();
+        },
+        render: function (elem, data, value, done) {
+            done(null, {value: value});
+        }
+    },
+    longitude: {
+        find: function (context, source, done) {
+            done(null, null, context.value);
+        },
+        update: function (context, source, error, value, done) {
+            context.value = value;
+            done();
+        },
+        render: function (elem, data, value, done) {
+            done(null, {value: value});
         }
     }
 };
@@ -157,31 +221,12 @@ var locateIp = function (done) {
 var locationUpdated = function (ctx, elem, location) {
     console.log(location);
     ctx.current = location;
-    $('.locate-name', elem).find('input').val(location.name);
-    $('.locate-line1', elem).find('input').val(location.line1);
-    $('.locate-line2', elem).find('input').val(location.line2);
-    $('.locate-postal', elem).find('input').val(location.postal);
-    $('.locate-city', elem).find('input').val(location.city);
-    var el = $('.locate-district', elem);
-    if (location.district) {
-        el.removeClass('hidden').find('input').val(location.district);
-    } else {
-        el.addClass('hidden');
-    }
-    el = $('.locate-province', elem);
-    if (location.province) {
-        el.removeClass('hidden').find('input').val(location.province);
-    } else {
-        el.addClass('hidden');
-    }
-    el = $('.locate-state', elem);
-    if (location.state) {
-        el.removeClass('hidden').find('input').val(location.state);
-    } else {
-        el.addClass('hidden');
-    }
-    $('.locate-country', elem).find('input').val(location.country);
-}
+    ctx.form.refresh(location, function (err) {
+        if (err) {
+            return console.error(err);
+        }
+    });
+};
 
 var initMap = function (ctx, elem, options, done) {
     var map = new google.maps.Map($('.locate-map', elem)[0], options);
@@ -190,11 +235,20 @@ var initMap = function (ctx, elem, options, done) {
         position: options.center,
         draggable: true
     });
-    map.addListener('click', function (e) {
-        marker.setPosition(e.latLng);
-    });
     var geocoder = new google.maps.Geocoder();
     var autoComplete = new google.maps.places.Autocomplete($('.locate-search', elem).find('input')[0], {});
+    var places = new google.maps.places.PlacesService(map);
+
+    map.addListener('click', function (e) {
+        marker.setPosition(e.latLng);
+        places.getDetails({placeId: e.placeId}, function (place, status) {
+            if (status !== 'OK') {
+                return console.error(status)
+            }
+            locationUpdated(ctx, elem, locate(place));
+        });
+    });
+
     autoComplete.addListener('place_changed', function () {
         var place = utils.clone(autoComplete.getPlace());
         var location = locate(place);
@@ -206,10 +260,12 @@ var initMap = function (ctx, elem, options, done) {
             }
         }, serand.none);
     });
+
     ctx.map = map;
     ctx.marker = marker;
     ctx.geocoder = geocoder;
     ctx.autoComplete = autoComplete;
+    ctx.places = places;
     done();
 };
 
@@ -331,14 +387,6 @@ var address = function (location) {
 
 module.exports = function (sandbox, data, done) {
     data = data || {};
-    var loctex = {
-        map: null,
-        geocoder: null,
-        marker: null,
-        autoComplete: null,
-        current: null,
-        selectLocation: null
-    };
     find(data, function (err, existing) {
         if (err) {
             return done(err);
@@ -349,6 +397,15 @@ module.exports = function (sandbox, data, done) {
             }
             var elem = sandbox.append(out);
             var lform = form.create(elem, configs);
+            var loctex = {
+                map: null,
+                geocoder: null,
+                marker: null,
+                autoComplete: null,
+                current: null,
+                selectLocation: null,
+                form: lform
+            };
             lform.render(data, function (err) {
                 if (err) {
                     return done(err);
@@ -367,6 +424,7 @@ module.exports = function (sandbox, data, done) {
                 var locations = [{value: '+', text: 'Add Location'}];
                 locations = locations.concat(ctx);
                 loctex.selectLocation.addOption(locations);
+                loctex.selectLocation.setValue(data.location || '');
                 loctex.selectLocation.on('change', function (loc) {
                     console.log(loc)
                     // current = loc;
@@ -409,6 +467,9 @@ module.exports = function (sandbox, data, done) {
                 eventer.on('create', function (location, done) {
                     console.log('creating location')
                     console.log(location)
+                    if (typeof location === 'string' || location instanceof String) {
+                        return done(null, location);
+                    }
                     create(location, done);
                 });
                 eventer.on('collapse', function (done) {
