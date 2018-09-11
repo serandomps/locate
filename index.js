@@ -96,7 +96,7 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (elem, data, value, done) {
+        render: function (contexts, elem, data, value, done) {
             var el = $('.locate-district', elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.district);
@@ -122,7 +122,7 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (elem, data, value, done) {
+        render: function (contexts, elem, data, value, done) {
             var el = $('.locate-province', elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.province);
@@ -148,7 +148,7 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (elem, data, value, done) {
+        render: function (contexts, elem, data, value, done) {
             var el = $('.locate-state', elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.state);
@@ -179,7 +179,7 @@ var configs = {
             context.value = value;
             done();
         },
-        render: function (elem, data, value, done) {
+        render: function (contexts, elem, data, value, done) {
             done(null, {value: value});
         }
     },
@@ -191,7 +191,7 @@ var configs = {
             context.value = value;
             done();
         },
-        render: function (elem, data, value, done) {
+        render: function (contexts, elem, data, value, done) {
             done(null, {value: value});
         }
     }
