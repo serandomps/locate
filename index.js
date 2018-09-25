@@ -15,6 +15,20 @@ utils.configs('boot', function (err, config) {
     googleGelocate += config.googleKey;
 });
 
+var user;
+
+serand.on('user', 'ready', function (usr) {
+    user = usr;
+});
+
+serand.on('user', 'logged in', function (usr) {
+    user = usr;
+});
+
+serand.on('user', 'logged out', function (usr) {
+    user = null;
+});
+
 var select = function (el, val) {
     el = el.children('select');
     return val ? el.val(val) : el;
@@ -96,8 +110,8 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (contexts, elem, data, value, done) {
-            var el = $('.locate-district', elem);
+        render: function (ctx, lform, data, value, done) {
+            var el = $('.locate-district', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.district);
             } else {
@@ -122,8 +136,8 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (contexts, elem, data, value, done) {
-            var el = $('.locate-province', elem);
+        render: function (ctx, lform, data, value, done) {
+            var el = $('.locate-province', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.province);
             } else {
@@ -148,8 +162,8 @@ var configs = {
             source.removeClass('hidden');
             done()
         },
-        render: function (contexts, elem, data, value, done) {
-            var el = $('.locate-state', elem);
+        render: function (ctx, lform, data, value, done) {
+            var el = $('.locate-state', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.state);
             } else {
@@ -179,7 +193,7 @@ var configs = {
             context.value = value;
             done();
         },
-        render: function (contexts, elem, data, value, done) {
+        render: function (ctx, lform, data, value, done) {
             done(null, {value: value});
         }
     },
@@ -191,7 +205,7 @@ var configs = {
             context.value = value;
             done();
         },
-        render: function (contexts, elem, data, value, done) {
+        render: function (ctx, lform, data, value, done) {
             done(null, {value: value});
         }
     }
@@ -338,7 +352,7 @@ var hideMap = function (elem) {
 var find = function (options, done) {
     $.ajax({
         method: 'GET',
-        url: utils.resolve('accounts:///apis/v/locations'),
+        url: utils.resolve('accounts:///apis/v/locations' + utils.query({user: options.user})),
         dataType: 'json',
         success: function (data) {
             done(null, data);
@@ -385,9 +399,9 @@ var address = function (location) {
     return address;
 };
 
-module.exports = function (sandbox, data, done) {
+module.exports = function (ctx, sandbox, data, done) {
     data = data || {};
-    find(data, function (err, existing) {
+    find({user: data.user || user && user.id}, function (err, existing) {
         if (err) {
             return done(err);
         }
@@ -406,7 +420,7 @@ module.exports = function (sandbox, data, done) {
                 selectLocation: null,
                 form: lform
             };
-            lform.render(data, function (err) {
+            lform.render(ctx, data, function (err) {
                 if (err) {
                     return done(err);
                 }
