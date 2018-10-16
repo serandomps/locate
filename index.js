@@ -15,20 +15,6 @@ utils.configs('boot', function (err, config) {
     googleGelocate += config.googleKey;
 });
 
-var user;
-
-serand.on('user', 'ready', function (usr) {
-    user = usr;
-});
-
-serand.on('user', 'logged in', function (usr) {
-    user = usr;
-});
-
-serand.on('user', 'logged out', function (usr) {
-    user = null;
-});
-
 var select = function (el, val) {
     el = el.children('select');
     return val ? el.val(val) : el;
@@ -37,8 +23,10 @@ var select = function (el, val) {
 var configs = {
     name: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
-            done(null, null, value);
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -47,11 +35,13 @@ var configs = {
     },
     line1: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please enter the number, street etc. of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -60,8 +50,10 @@ var configs = {
     },
     line2: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
-            done(null, null, value);
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -70,11 +62,13 @@ var configs = {
     },
     city: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please enter the city of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -83,11 +77,13 @@ var configs = {
     },
     postal: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please enter the postal code of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -96,11 +92,13 @@ var configs = {
     },
     district: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please enter the district of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -122,11 +120,13 @@ var configs = {
     },
     province: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please enter the province of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -148,11 +148,10 @@ var configs = {
     },
     state: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
-            /*if (!value) {
-                return done(null, 'Please enter the state of your location');
-            }*/
-            done(null, null, value);
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
+            done();
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -174,11 +173,13 @@ var configs = {
     },
     country: {
         find: function (context, source, done) {
-            var value = $('input', source).val();
+            done(null, $('input', source).val());
+        },
+        validate: function (context, data, value, done) {
             if (!value) {
                 return done(null, 'Please select the country of your location');
             }
-            done(null, null, value);
+            done();
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -187,7 +188,10 @@ var configs = {
     },
     latitude: {
         find: function (context, source, done) {
-            done(null, null, context.value);
+            done(null, context.value);
+        },
+        validate: function (context, data, value, done) {
+            done();
         },
         update: function (context, source, error, value, done) {
             context.value = value;
@@ -199,7 +203,10 @@ var configs = {
     },
     longitude: {
         find: function (context, source, done) {
-            done(null, null, context.value);
+            done(null, context.value);
+        },
+        validate: function (context, data, value, done) {
+            done();
         },
         update: function (context, source, error, value, done) {
             context.value = value;
@@ -357,8 +364,8 @@ var find = function (options, done) {
         success: function (data) {
             done(null, data);
         },
-        error: function (e) {
-            done(e);
+        error: function (xhr, status, err) {
+            done(err);
         }
     });
 };
@@ -373,8 +380,8 @@ var create = function (location, done) {
         success: function (data) {
             done(null, data.id);
         },
-        error: function (e) {
-            done(e);
+        error: function (xhr, status, err) {
+            done(err);
         }
     });
 };
@@ -401,7 +408,7 @@ var address = function (location) {
 
 module.exports = function (ctx, sandbox, data, done) {
     data = data || {};
-    find({user: data.user || user && user.id}, function (err, existing) {
+    find({user: data.user || ctx.user && ctx.user.id}, function (err, existing) {
         if (err) {
             return done(err);
         }
@@ -455,36 +462,68 @@ module.exports = function (ctx, sandbox, data, done) {
                 eventer.on('find', function (done) {
                     var value = el.children('select').val();
                     if (!value) {
-                        // TODO: return null here and error can be moved to caller
-                        return done(null, 'Please select the location of your vehicle');
+                        return done(null, value);
                     }
                     if (value === '-' || value === '+') {
-                        return lform.find(function (err, errors, location) {
+                        return lform.find(function (err, location) {
                             if (err) {
                                 return done(err);
                             }
-                            if (errors && errors.line1 && location.line2) {
-                                location.line1 = location.line2;
-                                delete location.line2;
-                                locationUpdated(loctex, elem, location);
-                                return lform.find(done);
-                            }
-                            done(err, errors, location);
+                            lform.validate(data, function (err, errors) {
+                                if (err) {
+                                    return done(err);
+                                }
+                                if (errors && errors.line1 && location.line2) {
+                                    location.line1 = location.line2;
+                                    delete location.line2;
+                                    locationUpdated(loctex, elem, location);
+                                    return lform.find(done);
+                                }
+                                done(err, location);
+                            });
                         });
                     }
-                    done(null, null, value);
+                    done(null, value);
                 });
-                eventer.on('update', function (errors, data, done) {
-                    console.log(data)
-                    lform.update(errors, data, done);
+                eventer.on('validate', function (location, done) {
+                    console.log(location);
+                    var i;
+                    var loc;
+                    if (typeof location !== 'string' && !(location instanceof String)) {
+                        return lform.validate(location, done);
+                    }
+                    if (['', '-', '+'].indexOf(location) === 0) {
+                        return done();
+                    }
+                    for (i = 0; i < existing.length; i++) {
+                        loc = existing[i];
+                        if (loc.id === location) {
+                            return done();
+                        }
+                    }
+                    done(new Error('Location ' + location + ' is invalid'));
+                });
+                eventer.on('update', function (errors, location, done) {
+                    console.log(location);
+                    lform.update(errors, location, done);
                 });
                 eventer.on('create', function (location, done) {
                     console.log('creating location')
                     console.log(location)
                     if (typeof location === 'string' || location instanceof String) {
-                        return done(null, location);
+                        return done(null, null, location);
                     }
-                    create(location, done);
+                    lform.create(location, function (err, errors, location) {
+                        if (err) {
+                            return done(err);
+                        }
+                        if (errors) {
+                            return done(null, errors);
+                        }
+                        create(location, function (err, id) {
+                            done(err, null, id);
+                        });
+                    });
                 });
                 eventer.on('collapse', function (done) {
                     hideMap(el);

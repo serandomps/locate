@@ -12,8 +12,16 @@ var normalize = function (o) {
     var geometry = o.geometry;
     if (geometry) {
         address.latitude = geometry.location.lat;
+        if (typeof address.latitude === 'function') {
+            address.latitude = address.latitude();
+        }
         address.longitude = geometry.location.lng;
+        if (typeof address.longitude === 'function') {
+            address.longitude = address.longitude();
+        }
     }
+    console.log('normalize')
+    console.log(address)
     address.name = o.name;
     address.place_id = o.place_id;
     address.international_phone_number = o.international_phone_number;
