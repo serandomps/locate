@@ -26,7 +26,7 @@ var configs = {
             done(null, $('input', source).val());
         },
         validate: function (context, data, value, done) {
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -41,7 +41,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please enter the number, street etc. of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -53,7 +53,7 @@ var configs = {
             done(null, $('input', source).val());
         },
         validate: function (context, data, value, done) {
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -68,7 +68,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please enter the city of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -83,7 +83,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please enter the postal code of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -98,7 +98,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please enter the district of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -126,7 +126,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please enter the province of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -151,7 +151,7 @@ var configs = {
             done(null, $('input', source).val());
         },
         validate: function (context, data, value, done) {
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             if (!value) {
@@ -179,7 +179,7 @@ var configs = {
             if (!value) {
                 return done(null, 'Please select the country of your location');
             }
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             $('input', source).val(value);
@@ -191,7 +191,7 @@ var configs = {
             done(null, context.value);
         },
         validate: function (context, data, value, done) {
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             context.value = value;
@@ -206,7 +206,7 @@ var configs = {
             done(null, context.value);
         },
         validate: function (context, data, value, done) {
-            done();
+            done(null, null, value);
         },
         update: function (context, source, error, value, done) {
             context.value = value;
@@ -469,7 +469,7 @@ module.exports = function (ctx, sandbox, data, done) {
                             if (err) {
                                 return done(err);
                             }
-                            lform.validate(data, function (err, errors) {
+                            lform.validate(location, function (err, errors, location) {
                                 if (err) {
                                     return done(err);
                                 }
@@ -498,7 +498,7 @@ module.exports = function (ctx, sandbox, data, done) {
                     for (i = 0; i < existing.length; i++) {
                         loc = existing[i];
                         if (loc.id === location) {
-                            return done();
+                            return done(null, null, location);
                         }
                     }
                     done(new Error('Location ' + location + ' is invalid'));
