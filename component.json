@@ -3,7 +3,7 @@
     "description": "locate component",
     "scripts": ["locate.js", "index.js"],
     "styles": ["styles.css"],
-    "templates": ["template.html"],
+    "templates": ["template.html", "select.html"],
     "main": "index.js",
     "dependencies": {
         "serandomps/dust": "master",

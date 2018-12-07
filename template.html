@@ -1,95 +1,77 @@
-<div class="form-group locate has-feedback">
+<div class="form-group locate">
     <!--<label>Make</label>-->
-    <select class="form-control locate-location" data-value="{location}">
-        <option value="">Location</option>
-        <!--  <option value="+">Add Location</option>
-        {#locations}
-        <option value="{id}">{line1}, {line2}, {city}, {postal}, {country}</option>
-        {/locations}-->
+    <select class="location form-control" data-value="{location}" data-style="border" data-searchbox-classes="border">
+        {>"locate-select"/}
     </select>
-    <span class="form-control-feedback hidden"></span>
-    <span class="help-block hidden"></span>
+    <div class="invalid-feedback"></div>
 
-    <div class="locate-add hidden">
-        <div class="form-group source locate-search has-feedback">
-            <!--<label class="control-label">Search</label>-->
+    <div class="add hidden">
+        <div class="source search mb-3 mt-3">
+            <label for="search-{id}" class="sr-only">Search</label>
             <div class="input-group">
-                <span class="input-group-btn">
-                  <button class="btn btn-default" type="button">
-                      <i class="fas fa-search"></i>
-                  </button>
-                </span>
-                <input type="text" class="form-control" placeholder="Search your address" value="{address}"/>
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+                <input type="text" class="form-control" id="search-{id}" placeholder="Search your addresss" value="{address}">
             </div>
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
         </div>
 
-        <div class="form-group">
-            <div class="locate-map"></div>
+        <div class="map mb-3 rounded border"></div>
+
+        <div class="source name mb-3" data-name="name">
+            <label for="name-{id}">Location Name</label>
+            <input type="text" class="form-control" id="name-{id}" placeholder="Location Name" value="{location.name}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-name has-feedback" data-name="name">
-            <label class="control-label">Location Name</label>
-            <input type="text" class="form-control" placeholder="Location Name" value="{name}">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source line1 mb-3" data-name="line1">
+            <label for="line1-{id}">Address Line 1</label>
+            <input type="text" class="form-control" id="line1-{id}" placeholder="Line 1" value="{location.line1}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-line1 has-feedback" data-name="line1">
-            <label class="control-label">Address Line 1</label>
-            <input type="text" class="form-control" placeholder="Line 1" value="{line1}">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source line2 mb-3" data-name="line2">
+            <label for="line2-{id}">Address Line 2</label>
+            <input type="text" class="form-control" id="line2-{id}" placeholder="Line 2" value="{location.line2}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-line2 has-feedback" data-name="line2">
-            <label class="control-label">Address Line 2</label>
-            <input type="text" class="form-control" placeholder="Line 2" value="{line2}">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source postal mb-3" data-name="postal">
+            <label for="postal-{id}">Postal Code</label>
+            <input type="text" class="form-control" id="postal-{id}" placeholder="Postal code" value="{location.postal}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-postal has-feedback" data-name="postal">
-            <label class="control-label">Postal Code</label>
-            <input type="text" class="form-control" placeholder="Postal Code" value="{postal}">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source city mb-3" data-name="city">
+            <label for="city-{id}">City</label>
+            <input type="text" class="form-control" id="city-{id}" placeholder="City" value="{location.city}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-city has-feedback" data-name="city">
-            <label class="control-label">City</label>
-            <input type="text" class="form-control" placeholder="City" value="{city}" disabled="disabled">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source district mb-3" data-name="district">
+            <label for="district-{id}">District</label>
+            <input type="text" class="form-control" id="district-{id}" placeholder="District" value="{location.district}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-district has-feedback" data-name="district">
-            <label class="control-label">District</label>
-            <input type="text" class="form-control" placeholder="District" value="{district}" disabled="disabled">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source province mb-3" data-name="province">
+            <label for="province-{id}">Province</label>
+            <input type="text" class="form-control" id="province-{id}" placeholder="Province" value="{location.province}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-province has-feedback" data-name="province">
-            <label class="control-label">Province</label>
-            <input type="text" class="form-control" placeholder="Province" value="{province}" disabled="disabled">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source state mb-3" data-name="state">
+            <label for="state-{id}">State</label>
+            <input type="text" class="form-control" id="state-{id}" placeholder="State" value="{location.state}" required>
+            <div class="invalid-feedback"></div>
         </div>
 
-        <div class="form-group source locate-state has-feedback" data-name="state">
-            <label class="control-label">State</label>
-            <input type="text" class="form-control" placeholder="State" value="{state}" disabled="disabled">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
-        </div>
-
-        <div class="form-group source locate-country has-feedback" data-name="country">
-            <label class="control-label">Country</label>
-            <input type="text" class="form-control" placeholder="Country" value="{country}" disabled="disabled">
-            <span class="form-control-feedback hidden"></span>
-            <span class="help-block hidden"></span>
+        <div class="source country mb-3" data-name="country">
+            <label for="country-{id}">Country</label>
+            <input type="text" class="form-control" id="country-{id}" placeholder="Country" value="{location.country}" required>
+            <div class="invalid-feedback"></div>
         </div>
     </div>
 </div>

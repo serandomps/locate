@@ -5,6 +5,7 @@ var dust = require('dust')();
 var locate = require('./locate');
 
 dust.loadSource(dust.compile(require('./template'), 'locate'));
+dust.loadSource(dust.compile(require('./select'), 'locate-select'));
 
 var googleGelocate = 'https://www.googleapis.com/geolocation/v1/geolocate?key=';
 
@@ -109,7 +110,7 @@ var configs = {
             done()
         },
         render: function (ctx, lform, data, value, done) {
-            var el = $('.locate-district', lform.elem);
+            var el = $('.district', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.district);
             } else {
@@ -137,7 +138,7 @@ var configs = {
             done()
         },
         render: function (ctx, lform, data, value, done) {
-            var el = $('.locate-province', lform.elem);
+            var el = $('.province', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.province);
             } else {
@@ -162,7 +163,7 @@ var configs = {
             done()
         },
         render: function (ctx, lform, data, value, done) {
-            var el = $('.locate-state', lform.elem);
+            var el = $('.state', lform.elem);
             if (value) {
                 el.removeClass('hidden').find('input').val(location.state);
             } else {
@@ -250,14 +251,14 @@ var locationUpdated = function (ctx, elem, location) {
 };
 
 var initMap = function (ctx, elem, options, done) {
-    var map = new google.maps.Map($('.locate-map', elem)[0], options);
+    var map = new google.maps.Map($('.map', elem)[0], options);
     var marker = new google.maps.Marker({
         map: map,
         position: options.center,
         draggable: true
     });
     var geocoder = new google.maps.Geocoder();
-    var autoComplete = new google.maps.places.Autocomplete($('.locate-search', elem).find('input')[0], {});
+    var autoComplete = new google.maps.places.Autocomplete($('.search', elem).find('input')[0], {});
     var places = new google.maps.places.PlacesService(map);
 
     map.addListener('click', function (e) {
@@ -314,7 +315,7 @@ var findLocation = function (ctx, o, done) {
 };
 
 var showMap = function (ctx, elem, done) {
-    $('.locate-add', elem).removeClass('hidden');
+    $('.add', elem).removeClass('hidden');
     findPosition(function (err, location) {
         if (err) {
             return done(err);
@@ -353,7 +354,7 @@ var updateMap = function (ctx, elem, options, done) {
 };
 
 var hideMap = function (elem) {
-    $('.locate-add', elem).addClass('hidden');
+    $('.add', elem).addClass('hidden');
 };
 
 var find = function (options, done) {
@@ -412,7 +413,21 @@ module.exports = function (ctx, sandbox, data, done) {
         if (err) {
             return done(err);
         }
-        dust.render('locate', {locations: existing}, function (err, out) {
+        var locationsById = _.groupBy(existing, 'id');
+        var locations = [
+            {val: '', title: 'Location'},
+            {val: '+', title: 'Add Location'}
+        ];
+        var locationsCtx = _.map(existing, function (location) {
+            return {
+                val: location.id,
+                title: address(location)
+            }
+        });
+        locations = locations.concat(locationsCtx);
+        dust.render('locate', {
+            locations: locations
+        }, function (err, out) {
             if (err) {
                 return done(err);
             }
@@ -424,7 +439,7 @@ module.exports = function (ctx, sandbox, data, done) {
                 marker: null,
                 autoComplete: null,
                 current: null,
-                selectLocation: null,
+                location: null,
                 form: lform
             };
             lform.render(ctx, data, function (err) {
@@ -434,37 +449,31 @@ module.exports = function (ctx, sandbox, data, done) {
                 var added;
                 var el = $('.locate', sandbox);
                 var eventer = utils.eventer();
-                loctex.selectLocation = form.selectize($('.locate-location', el).val(data.location || ''));
-                var ctx = _.map(existing, function (location) {
-                    return {
-                        value: location.id,
-                        text: address(location),
-                        location: location
-                    }
-                });
-                var locations = [{value: '+', text: 'Add Location'}];
-                locations = locations.concat(ctx);
-                loctex.selectLocation.addOption(locations);
-                loctex.selectLocation.setValue(data.location || '');
-                loctex.selectLocation.on('change', function (loc) {
-                    console.log(loc)
-                    // current = loc;
-                    eventer.emit('change', loc, serand.none);
-                    if (loc === '+') {
-                        return showMap(loctex, el, serand.none);
-                    }
-                    hideMap(el);
-                });
+                loctex.location = $('.location', el)
+                    .val(data.location || '')
+                    .selectpicker()
+                    .on('changed.bs.select', function () {
+                        var val = loctex.location.val();
+                        var loc = val ? locationsById[val] : null;
+                        console.log(loc)
+                        // current = loc;
+                        eventer.emit('change', loc, serand.none);
+                        if (val === '+') {
+                            return showMap(loctex, el, serand.none);
+                        }
+                        hideMap(el);
+                    });
                 eventer.on('destroy', function (done) {
+                    loctex.location.selectpicker('destroy');
                     el.remove();
                     done();
                 });
                 eventer.on('find', function (done) {
-                    var value = el.children('select').val();
-                    if (!value) {
-                        return done(null, value);
+                    var val = loctex.location.val();
+                    if (!val) {
+                        return done(null, val);
                     }
-                    if (value === '-' || value === '+') {
+                    if (val === '-' || val === '+') {
                         return lform.find(function (err, location) {
                             if (err) {
                                 return done(err);
@@ -483,7 +492,7 @@ module.exports = function (ctx, sandbox, data, done) {
                             });
                         });
                     }
-                    done(null, value);
+                    done(null, locationsById[val]);
                 });
                 eventer.on('validate', function (location, done) {
                     console.log(location);
@@ -531,25 +540,17 @@ module.exports = function (ctx, sandbox, data, done) {
                     // how to handle multipe usages of locate components
                     // introduce a local ctx which get passed to all methods
                     // add -> select existing -> add -> next shows empty in selected
-                    var locations = [{value: '-', text: address(loctex.current), location: loctex.current}];
-                    locations.push({value: '+', text: 'Edit Location'});
-                    locations = locations.concat(ctx);
-                    console.log(locations);
-                    loctex.selectLocation.destroy();
-                    loctex.selectLocation = form.selectize($('.locate-location', el));
-                    loctex.selectLocation.addOption(locations);
-                    loctex.selectLocation.addItem('-');
-                    loctex.selectLocation.refreshOptions(false);
-                    loctex.selectLocation.on('change', function (loc) {
-                        console.log(loc)
-                        // current = loc;
-                        eventer.emit('change', loc, serand.none);
-                        if (loc === '+') {
-                            return showMap(loctex, el, serand.none);
+                    var locations = [{val: '-', title: address(loctex.current)}];
+                    locations.push({val: '+', title: 'Edit Location'});
+                    locations = locations.concat(locationsCtx);
+                    dust.render('locate-select', locations, function (err, out) {
+                        if (err) {
+                            return done(err);
                         }
-                        hideMap(el);
+                        $('.location', el).html(out);
+                        loctex.location.selectpicker('refresh');
+                        done();
                     });
-                    done();
                 });
                 done(null, eventer);
             });
