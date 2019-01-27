@@ -1,7 +1,9 @@
 <div class="form-group locate">
-    <!--<label>Make</label>-->
+    <label>Location</label>
     <select class="location form-control" data-value="{location}" data-style="border" data-searchbox-classes="border">
+        {#locations}
         {>"locate-select"/}
+        {/locations}
     </select>
     <div class="invalid-feedback"></div>
 

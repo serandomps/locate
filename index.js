@@ -413,7 +413,7 @@ module.exports = function (ctx, sandbox, data, done) {
         if (err) {
             return done(err);
         }
-        var locationsById = _.groupBy(existing, 'id');
+        var locationsById = _.keyBy(existing, 'id');
         var locations = [
             {val: '', title: 'Location'},
             {val: '+', title: 'Add Location'}
@@ -452,9 +452,9 @@ module.exports = function (ctx, sandbox, data, done) {
                 loctex.location = $('.location', el)
                     .val(data.location || '')
                     .selectpicker()
-                    .on('changed.bs.select', function () {
-                        var val = loctex.location.val();
-                        var loc = val ? locationsById[val] : null;
+                    .on('change', function () {
+                        var val = $(this).val();
+                        var loc = val ? locationsById[val] : val;
                         console.log(loc)
                         // current = loc;
                         eventer.emit('change', loc, serand.none);
@@ -547,8 +547,7 @@ module.exports = function (ctx, sandbox, data, done) {
                         if (err) {
                             return done(err);
                         }
-                        $('.location', el).html(out);
-                        loctex.location.selectpicker('refresh');
+                        loctex.location.html(out).selectpicker('refresh');
                         done();
                     });
                 });
