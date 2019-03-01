@@ -16,12 +16,55 @@ utils.configs('boot', function (err, config) {
     googleGelocate += config.googleKey;
 });
 
-var select = function (el, val) {
-    el = el.children('select');
-    return val ? el.val(val) : el;
+var pickerConfig = function (o) {
+    return {
+        location: {
+            find: function (context, source, done) {
+                serand.blocks('select', 'find', source, done);
+            },
+            validate: function (context, data, value, done) {
+                if (!value) {
+                    return done(null, 'Please select an existing location or create one');
+                }
+                done(null, null, value);
+            },
+            update: function (context, source, error, value, done) {
+                done();
+            },
+            render: function (ctx, pickerForm, data, value, done) {
+                var picker = $('.picker .location', pickerForm.elem);
+                var creator = $('.creator', pickerForm.elem);
+                serand.blocks('select', 'create', picker, {
+                    value: value,
+                    change: function () {
+                        pickerForm.find(function (err, pick) {
+                            if (err) {
+                                return done(err);
+                            }
+                            pickerForm.validate(pick, function (err, errors, location) {
+                                if (err) {
+                                    return done(err);
+                                }
+                                pickerForm.update(errors, location, function (err) {
+                                    if (err) {
+                                        return done(err);
+                                    }
+                                    var val = pick.location;
+                                    if (val === '+') {
+                                        return showMap(o.loctex, creator, serand.none);
+                                    }
+                                    hideMap(creator);
+                                });
+                            });
+                        });
+                    }
+                }, done);
+            }
+        },
+    };
 };
 
-var configs = {
+var creatorConfig = {
     name: {
         find: function (context, source, done) {
             done(null, $('input', source).val());
@@ -315,7 +358,7 @@ var findLocation = function (ctx, o, done) {
 };
 
 var showMap = function (ctx, elem, done) {
-    $('.add', elem).removeClass('hidden');
+    elem.removeClass('hidden');
     findPosition(function (err, location) {
         if (err) {
             return done(err);
@@ -354,10 +397,10 @@ var updateMap = function (ctx, elem, options, done) {
 };
 
 var hideMap = function (elem) {
-    $('.add', elem).addClass('hidden');
+    elem.addClass('hidden');
 };
 
-var find = function (options, done) {
+var findLocations = function (options, done) {
     $.ajax({
         method: 'GET',
         url: utils.resolve('accounts:///apis/v/locations' + utils.query({user: options.user})),
@@ -407,32 +450,38 @@ var address = function (location) {
     return address;
 };
 
-module.exports = function (ctx, sandbox, data, done) {
+module.exports = function (ctx, container, data, done) {
+    var sandbox = container.sandbox;
     data = data || {};
-    find({user: data.user || ctx.user && ctx.user.id}, function (err, existing) {
+    findLocations({user: data.user || ctx.user && ctx.user.id}, function (err, locations) {
         if (err) {
             return done(err);
         }
-        var locationsById = _.keyBy(existing, 'id');
-        var locations = [
-            {val: '', title: 'Location'},
-            {val: '+', title: 'Add Location'}
+        var locationsById = _.keyBy(locations, 'id');
+        var picks = [
+            {value: '', label: 'Location'},
+            {value: '+', label: 'Add Location'}
         ];
-        var locationsCtx = _.map(existing, function (location) {
+        picks = picks.concat(_.map(locations, function (location) {
             return {
-                val: location.id,
-                title: address(location)
+                value: location.id,
+                label: address(location)
             }
-        });
-        locations = locations.concat(locationsCtx);
+        }));
         dust.render('locate', {
-            locations: locations
+            _: {
+                container: container.id,
+                picks: picks
+            }
         }, function (err, out) {
             if (err) {
                 return done(err);
             }
             var elem = sandbox.append(out);
-            var lform = form.create(elem, configs);
+            var o = utils.eventer();
+
+            var creatorForm = form.create(container.id, elem, creatorConfig);
+
             var loctex = {
                 map: null,
                 geocoder: null,
@@ -440,118 +489,107 @@ module.exports = function (ctx, sandbox, data, done) {
                 autoComplete: null,
                 current: null,
                 location: null,
-                form: lform
+                form: creatorForm
             };
-            lform.render(ctx, data, function (err) {
-                if (err) {
-                    return done(err);
-                }
-                var added;
-                var el = $('.locate', sandbox);
-                var eventer = utils.eventer();
-                loctex.location = $('.location', el)
-                    .val(data.location || '')
-                    .selectpicker()
-                    .on('change', function () {
-                        var val = $(this).val();
-                        var loc = val ? locationsById[val] : val;
-                        console.log(loc)
-                        // current = loc;
-                        eventer.emit('change', loc, serand.none);
-                        if (val === '+') {
-                            return showMap(loctex, el, serand.none);
-                        }
-                        hideMap(el);
-                    });
-                eventer.on('destroy', function (done) {
-                    loctex.location.selectpicker('destroy');
-                    el.remove();
-                    done();
-                });
-                eventer.on('find', function (done) {
-                    var val = loctex.location.val();
-                    if (!val) {
-                        return done(null, val);
+
+            var opts = {
+                eventer: o,
+                locationsById: locationsById,
+                loctex: loctex
+            };
+
+            var pickerForm = form.create(container.id, elem, pickerConfig(opts));
+
+            o.find = function (done) {
+                pickerForm.find(function (err, o) {
+                    if (err) {
+                        return done(err);
                     }
-                    if (val === '-' || val === '+') {
-                        return lform.find(function (err, location) {
+                    if (o.location !== '+') {
+                        return done(err, o.location);
+                    }
+                    creatorForm.find(function (err, o) {
+                        if (err) {
+                            return done(err);
+                        }
+                        creatorForm.validate(o, function (err, errors, location) {
                             if (err) {
                                 return done(err);
                             }
-                            lform.validate(location, function (err, errors, location) {
-                                if (err) {
-                                    return done(err);
-                                }
-                                if (errors && errors.line1 && location.line2) {
-                                    location.line1 = location.line2;
-                                    delete location.line2;
-                                    locationUpdated(loctex, elem, location);
-                                    return lform.find(done);
-                                }
-                                done(err, location);
-                            });
-                        });
-                    }
-                    done(null, locationsById[val]);
-                });
-                eventer.on('validate', function (location, done) {
-                    console.log(location);
-                    var i;
-                    var loc;
-                    if (typeof location !== 'string' && !(location instanceof String)) {
-                        return lform.validate(location, done);
-                    }
-                    if (['', '-', '+'].indexOf(location) === 0) {
-                        return done();
-                    }
-                    for (i = 0; i < existing.length; i++) {
-                        loc = existing[i];
-                        if (loc.id === location) {
-                            return done(null, null, location);
-                        }
-                    }
-                    done(new Error('Location ' + location + ' is invalid'));
-                });
-                eventer.on('update', function (errors, location, done) {
-                    console.log(location);
-                    lform.update(errors, location, done);
-                });
-                eventer.on('create', function (location, done) {
-                    console.log('creating location')
-                    console.log(location)
-                    if (typeof location === 'string' || location instanceof String) {
-                        return done(null, null, location);
-                    }
-                    lform.create(location, function (err, errors, location) {
-                        if (err) {
-                            return done(err);
-                        }
-                        if (errors) {
-                            return done(null, errors);
-                        }
-                        create(location, function (err, id) {
-                            done(err, null, id);
+                            if (errors && errors.line1 && location.line2) {
+                                location.line1 = location.line2;
+                                delete location.line2;
+                                locationUpdated(loctex, elem, location);
+                                return creatorForm.find(done);
+                            }
+                            done(err, location);
                         });
                     });
                 });
-                eventer.on('collapse', function (done) {
-                    hideMap(el);
-                    // how to get newly added address
-                    // how to handle multipe usages of locate components
-                    // introduce a local ctx which get passed to all methods
-                    // add -> select existing -> add -> next shows empty in selected
-                    var locations = [{val: '-', title: address(loctex.current)}];
-                    locations.push({val: '+', title: 'Edit Location'});
-                    locations = locations.concat(locationsCtx);
-                    dust.render('locate-select', locations, function (err, out) {
-                        if (err) {
-                            return done(err);
-                        }
-                        loctex.location.html(out).selectpicker('refresh');
-                        done();
+            };
+            o.validate = function (loc, done) {
+                pickerForm.find(function (err, o) {
+                    if (err) {
+                        return done(err);
+                    }
+                    if (o.location !== '+') {
+                        pickerForm.validate({
+                            location: loc
+                        }, function (err, errors, location) {
+                            if (err) {
+                                return done(err);
+                            }
+                            done(err, errors, location);
+                        });
+                        return;
+                    }
+                    creatorForm.validate(loc, done);
+                });
+            };
+            o.update = function (errors, location, done) {
+                pickerForm.find(function (err, o) {
+                    if (err) {
+                        return done(err);
+                    }
+                    if (o.location !== '+') {
+                        return pickerForm.update(errors, location, done);
+                    }
+                    creatorForm.update(errors, location, done);
+                });
+            };
+            o.create = function (location, done) {
+                console.log('creating location')
+                console.log(location)
+                if (typeof location === 'string' || location instanceof String) {
+                    return done(null, null, location);
+                }
+                creatorForm.create(location, function (err, errors, location) {
+                    if (err) {
+                        return done(err);
+                    }
+                    if (errors) {
+                        return done(null, errors);
+                    }
+                    create(location, function (err, id) {
+                        done(err, null, id);
                     });
                 });
-                done(null, eventer);
+            };
+
+            pickerForm.render(ctx, {
+                location: data.location
+            }, function (err) {
+                if (err) {
+                    return done(err);
+                }
+                creatorForm.render(ctx, {
+                    location: data.location
+                }, function (err) {
+                    if (err) {
+                        return done(err);
+                    }
+                    done(null, o);
+                });
             });
         });
     });

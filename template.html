@@ -1,79 +1,18 @@
-<div class="form-group locate">
-    <label>Location</label>
-    <select class="location form-control" data-value="{location}" data-style="border" data-searchbox-classes="border">
-        {#locations}
-        {>"locate-select"/}
-        {/locations}
-    </select>
-    <div class="invalid-feedback"></div>
-
-    <div class="add hidden">
-        <div class="source search mb-3 mt-3">
-            <label for="search-{id}" class="sr-only">Search</label>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">
-                        <i class="fas fa-search"></i>
-                    </span>
-                </div>
-                <input type="text" class="form-control" id="search-{id}" placeholder="Search your addresss" value="{address}">
-            </div>
-        </div>
-
+<div class="locate">
+    <div class="picker">
+        {@blocks block="select" id=_.container name="location" label="Location" value=location options=_.picks/}
+    </div>
+    <div class="creator hidden">
+        {@blocks block="text" id=_.container name="search" help="Search your address" value=address label="Search" icon="fas fa-search" srOnly="true"/}
         <div class="map mb-3 rounded border"></div>
-
-        <div class="source name mb-3" data-name="name">
-            <label for="name-{id}">Location Name</label>
-            <input type="text" class="form-control" id="name-{id}" placeholder="Location Name" value="{location.name}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source line1 mb-3" data-name="line1">
-            <label for="line1-{id}">Address Line 1</label>
-            <input type="text" class="form-control" id="line1-{id}" placeholder="Line 1" value="{location.line1}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source line2 mb-3" data-name="line2">
-            <label for="line2-{id}">Address Line 2</label>
-            <input type="text" class="form-control" id="line2-{id}" placeholder="Line 2" value="{location.line2}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source postal mb-3" data-name="postal">
-            <label for="postal-{id}">Postal Code</label>
-            <input type="text" class="form-control" id="postal-{id}" placeholder="Postal code" value="{location.postal}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source city mb-3" data-name="city">
-            <label for="city-{id}">City</label>
-            <input type="text" class="form-control" id="city-{id}" placeholder="City" value="{location.city}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source district mb-3" data-name="district">
-            <label for="district-{id}">District</label>
-            <input type="text" class="form-control" id="district-{id}" placeholder="District" value="{location.district}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source province mb-3" data-name="province">
-            <label for="province-{id}">Province</label>
-            <input type="text" class="form-control" id="province-{id}" placeholder="Province" value="{location.province}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source state mb-3" data-name="state">
-            <label for="state-{id}">State</label>
-            <input type="text" class="form-control" id="state-{id}" placeholder="State" value="{location.state}" required>
-            <div class="invalid-feedback"></div>
-        </div>
-
-        <div class="source country mb-3" data-name="country">
-            <label for="country-{id}">Country</label>
-            <input type="text" class="form-control" id="country-{id}" placeholder="Country" value="{location.country}" required>
-            <div class="invalid-feedback"></div>
-        </div>
+        {@blocks block="text" id=_.container name="name" help="Name" value=location.name label="Name"/}
+        {@blocks block="text" id=_.container name="line1" help="Line 1" value=location.line1 label="Address Line 1"/}
+        {@blocks block="text" id=_.container name="line2" help="Line 1" value=location.line2 label="Address Line 2"/}
+        {@blocks block="text" id=_.container name="postal" help="Postal code" value=location.postal label="Postal Code"/}
+        {@blocks block="text" id=_.container name="city" help="City" value=location.city label="City" readOnly="true"/}
+        {@blocks block="text" id=_.container name="district" help="District" value=location.district label="District" readOnly="true"/}
+        {@blocks block="text" id=_.container name="province" help="Province" value=location.province label="Province" readOnly="true"/}
+        {@blocks block="text" id=_.container name="state" help="State" value=location.state label="State" readOnly="true"/}
+        {@blocks block="text" id=_.container name="country" help="Country" value=location.country label="Country" readOnly="true"/}
     </div>
 </div>
