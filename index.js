@@ -430,7 +430,7 @@ var create = function (location, done) {
     });
 };
 
-var address = function (location) {
+var serialize = function (location) {
     var address = '';
     address += location.name ? location.name + ', ' : '';
     if (location.name !== location.line1) {
@@ -457,7 +457,6 @@ module.exports = function (ctx, container, data, done) {
         if (err) {
             return done(err);
         }
-        var locationsById = _.keyBy(locations, 'id');
         var picks = [
             {value: '', label: 'Location'},
             {value: '+', label: 'Add Location'}
@@ -465,11 +464,12 @@ module.exports = function (ctx, container, data, done) {
         picks = picks.concat(_.map(locations, function (location) {
             return {
                 value: location.id,
-                label: address(location)
+                label: serialize(location)
             }
         }));
         dust.render('locate', {
             _: {
+                label: data.label,
                 container: container.id,
                 picks: picks
             }
@@ -494,7 +494,6 @@ module.exports = function (ctx, container, data, done) {
 
             var opts = {
                 eventer: o,
-                locationsById: locationsById,
                 loctex: loctex
             };
 
@@ -535,11 +534,11 @@ module.exports = function (ctx, container, data, done) {
                     if (o.location !== '+') {
                         pickerForm.validate({
                             location: loc
-                        }, function (err, errors, location) {
+                        }, function (err, errors) {
                             if (err) {
                                 return done(err);
                             }
-                            done(err, errors, location);
+                            done(err, errors, loc);
                         });
                         return;
                     }
