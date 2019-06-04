@@ -453,7 +453,7 @@ var serialize = function (location) {
 module.exports = function (ctx, container, data, done) {
     var sandbox = container.sandbox;
     data = data || {};
-    findLocations({user: data.user || ctx.user && ctx.user.id}, function (err, locations) {
+    findLocations({user: data.user || ctx.token && ctx.token.user.id}, function (err, locations) {
         if (err) {
             return done(err);
         }
